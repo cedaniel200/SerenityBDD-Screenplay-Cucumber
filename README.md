@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Serenity BDD](https://img.shields.io/badge/Serenity%20BDD-5.4.1-green)
 ![Cucumber](https://img.shields.io/badge/Cucumber-8.0.4-brightgreen)
-![Gradle](https://img.shields.io/badge/Gradle-9.6.1-darkgreen)
+![Gradle](https://img.shields.io/badge/Gradle-9.8.2-darkgreen)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 Proyecto base para automatización de pruebas web con Serenity BDD, el patrón Screenplay y Cucumber 8 sobre Gradle.
@@ -41,7 +41,7 @@ Proyecto base para automatización de pruebas web con Serenity BDD, el patrón S
 | Tecnología | Versión | Origen |
 |---|---|---|
 | Java (JDK) | 17 | `build.gradle` (`java.toolchain`, `JavaLanguageVersion.of(17)`) |
-| Gradle (wrapper) | 9.6.1 | `gradle/wrapper/gradle-wrapper.properties` |
+| Gradle (wrapper) | 9.8.2 | `gradle/wrapper/gradle-wrapper.properties` |
 | Serenity BDD (`serenity-core`, `serenity-junit`) | 5.4.1 | `build.gradle` (`serenityVersion`) |
 | Serenity Screenplay (`serenity-screenplay`, `serenity-screenplay-webdriver`) | 5.4.1 | `build.gradle` |
 | Serenity Cucumber (`serenity-cucumber`) | 5.4.1 | `build.gradle` |
@@ -54,13 +54,13 @@ Proyecto base para automatización de pruebas web con Serenity BDD, el patrón S
 
 ## Requisitos
 
-- **JDK 17**. El `build.gradle` fija un toolchain de Java 17: compila y ejecuta los tests con un JDK 17 aunque Gradle arranque con otra versión. Ese JDK 17 debe estar instalado y ser detectable por Gradle. Gradle 9.6.1, a su vez, necesita JDK 17 o superior para arrancar; no funciona sobre JDK 11.
+- **JDK 17**. El `build.gradle` fija un toolchain de Java 17: compila y ejecuta los tests con un JDK 17 aunque Gradle arranque con otra versión. Ese JDK 17 debe estar instalado y ser detectable por Gradle. Gradle 9.8.2, a su vez, necesita JDK 17 o superior para arrancar; no funciona sobre JDK 11.
 - **Gradle**: no hace falta instalarlo. El repositorio incluye el wrapper (`gradlew`, `gradlew.bat`, `gradle/wrapper/`).
-- **Driver de navegador**: el repositorio incluye `chromedriver.exe` y `geckodriver.exe` en la raíz.
+- **Driver de navegador**: no hay que descargarlo ni versionarlo. Selenium 4 incluye Selenium Manager, que detecta el navegador instalado y resuelve el driver adecuado en la primera ejecución (requiere conexión a internet esa vez).
 - **Chrome** instalado, porque `serenity.properties` fija `webdriver.driver=chrome` (ver [Configuración](#configuración)).
 
-> [!WARNING]
-> Los dos drivers versionados son ejecutables de **Windows**. En macOS o Linux hay que aportar el binario equivalente para la plataforma y la versión de Chrome o Firefox instalada. Las versiones de los drivers del repositorio no se pueden verificar sin ejecutarlos. [por confirmar: versión de cada driver]
+> [!NOTE]
+> El repo no incluye drivers: se resuelven con Selenium Manager. Si la máquina no tiene Chrome instalado, `webdriver.driver=chrome` fallará; cambia el valor en `serenity.properties` o aporta un driver propio con `webdriver.chrome.driver`.
 
 ## Cómo se ejecuta
 
@@ -101,10 +101,8 @@ y queda en `target/site/serenity/index.html`. `target/` está en `.gitignore`, a
 ├── build.gradle                  # dependencias, toolchain 17, plugin de Serenity
 ├── settings.gradle               # rootProject.name = 'automatizacion'
 ├── serenity.properties           # navegador y opciones de arranque de Chrome
-├── gradlew / gradlew.bat         # wrapper de Gradle 9.6.1
+├── gradlew / gradlew.bat         # wrapper de Gradle 9.8.2
 ├── gradle/wrapper/               # jar y properties del wrapper
-├── chromedriver.exe              # driver de Chrome para Windows
-├── geckodriver.exe               # driver de Firefox para Windows
 ├── LICENSE                       # MIT
 └── src
     ├── main/java/com/cedaniel200
@@ -205,7 +203,7 @@ La ejecución de tests se paraleliza con `maxParallelForks = Runtime.runtime.ava
 
 Cambios aplicados en este orden:
 
-1. **Wrapper**: Gradle 5.2.1 → 9.6.1. Gradle 9 ya no expone `jcenter()`, así que se eliminó de los bloques `repositories`, junto con `mavenLocal()`.
+1. **Wrapper**: Gradle 5.2.1 → 9.8.2. Gradle 9 ya no expone `jcenter()`, así que se eliminó de los bloques `repositories`, junto con `mavenLocal()`.
 2. **Dependencias**: Serenity 2.0.43 → 5.4.1 en todos los artefactos. `serenity-cucumber4:1.0.5` desaparece; su sustituto es `serenity-cucumber:5.4.1`. Se elimina el `resolutionStrategy.force` de `cucumber-core`: `serenity-cucumber` aporta Cucumber 8.0.4 (`cucumber-core`, `cucumber-java` y `cucumber-junit`) como transitivas, sin fijar versión.
 3. **Java**: toolchain 17. Serenity 5.4.1 se publica para Java 17 y Gradle 9 necesita JDK 17 o superior para arrancar.
 4. **Código de test**: `cucumber.api.*` dejó de existir en Cucumber 5. Los imports pasan a `io.cucumber.junit.CucumberOptions`, `io.cucumber.junit.CucumberOptions.SnippetType` e `io.cucumber.java.*`. La lógica de los pasos no cambia.
@@ -251,8 +249,7 @@ Puntos detectados en el código y en la ejecución actual:
 | Punto | Detalle |
 |---|---|
 | Sin aserciones | El escenario no puede fallar por un resultado incorrecto. Es una demo de integración, no una prueba de negocio. |
-| Sin uso de WebDriver | `serenity.properties` y los drivers están configurados, pero ningún paso abre un navegador. |
-| Drivers solo para Windows | `chromedriver.exe` y `geckodriver.exe` no sirven en macOS ni Linux. [por confirmar: versión de los drivers] |
+| Sin uso de WebDriver | `serenity.properties` configura Chrome, pero ningún paso abre un navegador. |
 | Nombres con sufijo `Cucumber4` | Las clases y el feature conservan el nombre de la migración anterior; la versión real es Cucumber 8. |
 | Escenario mal nombrado | El título `Crear Repositorio Exitosamente` no tiene relación con la feature `Sumar`: parece un resto de copia. |
 | Actor fijado en el `When` | El paso `Andres suma {int} mas {double}` fija el nombre del actor, mientras el `Given` lo recibe por parámetro. |
