@@ -19,6 +19,12 @@ plugins {
 
 apply plugin: 'net.serenity-bdd.aggregator'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 group 'com.cedaniel200'
 version '1.0.0'
 
