@@ -251,7 +251,7 @@ Puntos detectados en el código y en la ejecución actual:
 | Sin aserciones | El escenario no puede fallar por un resultado incorrecto. Es una demo de integración, no una prueba de negocio. |
 | Sin uso de WebDriver | `serenity.properties` y los drivers están configurados, pero ningún paso abre un navegador. |
 | Drivers solo para Windows | `chromedriver.exe` y `geckodriver.exe` no sirven en macOS ni Linux. [por confirmar: versión de los drivers] |
-| Runner JUnit 4 deprecado | `CucumberWithSerenity` y `io.cucumber.junit.CucumberOptions` están marcados como deprecados para eliminación en Serenity 5.4.1 / Cucumber 8. |
+| Runner JUnit 4 deprecado | `CucumberWithSerenity` y `io.cucumber.junit.CucumberOptions` están marcados para eliminación en Serenity 5.4.1 / Cucumber 8. Se mantienen a propósito: `serenity-cucumber:5.4.1` no publica integración con JUnit Platform — solo el runner de JUnit 4 y el backend de Cucumber (`SerenityBackend`, `SerenityObjectFactory`) por SPI, sin ningún `TestEngine` registrado. Mover el runner a `cucumber-junit-platform-engine` obligaría a conectar `SerenityReporter` a mano, sin soporte documentado, y pondría en riesgo el informe. Se revisa cuando Serenity publique esa integración. |
 | Nombres con sufijo `Cucumber4` | Las clases y el feature conservan el nombre de la migración anterior; la versión real es Cucumber 8. |
 | Escenario mal nombrado | El título `Crear Repositorio Exitosamente` no tiene relación con la feature `Sumar`: parece un resto de copia. |
 | Actor fijado en el `When` | El paso `Andres suma {int} mas {double}` fija el nombre del actor, mientras el `Given` lo recibe por parámetro. |
