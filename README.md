@@ -9,7 +9,7 @@
 Proyecto base para automatización de pruebas web con Serenity BDD, el patrón Screenplay y Cucumber 8 sobre Gradle.
 
 > [!NOTE]
-> Los nombres de archivo y de clase conservan el sufijo `Cucumber4` (`PruebaCucumber4`, `prueba_cucumber4.feature`) porque se mantuvieron al migrar de Cucumber 2 a 4 y de 4 a 8. Son nombres históricos, no la versión en uso.
+> El feature y las definiciones de pasos conservan el sufijo `Cucumber4` (`prueba_cucumber4.feature`, `PruebaCucumber4StepDefinitions`) porque se mantuvieron al migrar de Cucumber 2 a 4 y de 4 a 8. Son nombres históricos, no la versión en uso.
 
 ## Tabla de contenido
 
@@ -28,7 +28,7 @@ Proyecto base para automatización de pruebas web con Serenity BDD, el patrón S
 
 ## Qué demuestra
 
-- Integración de Serenity BDD con Cucumber 8 mediante el runner `CucumberWithSerenity`.
+- Integración de Serenity BDD con Cucumber 8 sobre **JUnit Platform**, con `@Suite` + `@SelectClasspathResource` y el informe de Serenity generado desde el plugin `SerenityReporter`.
 - Uso de `OnStage` y `OnlineCast` para preparar el escenario y de `remember` / `recall` para guardar datos entre pasos.
 - Expresiones de parámetros de Cucumber 8 en las definiciones de pasos: `{string}`, `{int}` y `{double}`.
 - Un esqueleto de paquetes Screenplay (`task`, `interactions`, `userinterfaces`, `questions`, `models`, `exceptions`, `utils`) listo para rellenar.
@@ -47,7 +47,8 @@ Proyecto base para automatización de pruebas web con Serenity BDD, el patrón S
 | Serenity Cucumber (`serenity-cucumber`) | 5.4.1 | `build.gradle` |
 | Cucumber JVM (`cucumber-core`, `cucumber-java`, `cucumber-junit`) | 8.0.4 | Transitiva de `serenity-cucumber:5.4.1`; no se declara versión |
 | Plugin de Gradle de Serenity (`serenity-gradle-plugin`) | 2.4.34 | `build.gradle` (`serenityGradlePluginVersion`) |
-| JUnit | 4.13.2 | `build.gradle` |
+| JUnit Platform Suite | 6.1.3 | `build.gradle` |
+| Cucumber JUnit Platform Engine | 8.0.4 | `build.gradle` |
 | AssertJ | 3.27.7 | `build.gradle` (declarada, sin uso en el código actual) |
 | SLF4J Simple | 2.0.20 | `build.gradle` |
 
@@ -117,7 +118,7 @@ y queda en `target/site/serenity/index.html`. `target/` está en `.gitignore`, a
     │   └── utils/                 # utilidades
     └── test
         ├── java/com/cedaniel200
-        │   ├── runners/PruebaCucumber4.java              # runner Cucumber + Serenity
+        │   ├── runners/CucumberTestSuite.java            # suite JUnit Platform (entrada)
         │   └── stepdefinitions/PruebaCucumber4StepDefinitions.java
         └── resources/features/prueba_cucumber4.feature   # único feature del proyecto
 ```
@@ -140,8 +141,8 @@ Para convertir el proyecto en la base de un proyecto real:
 
 1. Renombra el paquete base `com.cedaniel200` por el de tu organización (el propio `package-info.java` lo sugiere).
 2. Crea las clases de `task`, `interactions`, `userinterfaces` y `questions` en `src/main/java`.
-3. Añade features en `src/test/resources/features` y actualiza el atributo `features` del runner.
-4. Amplía el `glue` del runner si las definiciones de pasos viven en otro paquete.
+3. Añade features en `src/test/resources/features`: la suite las descubre por directorio, no hace falta registrarlas una a una.
+4. Amplía el parámetro `cucumber.glue` de `CucumberTestSuite` si las definiciones de pasos viven en otro paquete.
 
 ## Pruebas
 
@@ -165,7 +166,7 @@ Lo que **no** hace:
 - La comparación del resultado se hace con `==` sobre `double`.
 
 > [!NOTE]
-> El runner fija `features = {"src/test/resources/features/prueba_cucumber4.feature"}`. Un `.feature` nuevo no se ejecutará hasta que se añada su ruta (o un directorio) a ese atributo.
+> La suite selecciona el directorio `features` completo, así que cualquier `.feature` nuevo en esa carpeta se ejecuta sin tocar código.
 
 No hay tests unitarios, ni pipeline de CI, ni tareas de análisis estático en el repositorio.
 
@@ -196,7 +197,7 @@ Screenplay con el reparto de responsabilidades habitual:
 | `exceptions` | Excepciones técnicas y de negocio |
 | `utils` | Utilidades |
 
-El `build.gradle` coloca `serenity-screenplay` y `serenity-screenplay-webdriver` en la configuración `implementation`, porque el código de Screenplay vive en `src/main/java`. Las dependencias de ejecución de pruebas (`serenity-core`, `serenity-junit`, `serenity-cucumber`, JUnit, AssertJ) están en `testImplementation`.
+El `build.gradle` coloca `serenity-screenplay` y `serenity-screenplay-webdriver` en la configuración `implementation`, porque el código de Screenplay vive en `src/main/java`. Las dependencias de ejecución de pruebas (`serenity-core`, `serenity-cucumber`, el motor de Cucumber para JUnit Platform, la suite de plataforma y AssertJ) están en `testImplementation`.
 
 La ejecución de tests se paraleliza con `maxParallelForks = Runtime.runtime.availableProcessors()`.
 
@@ -208,7 +209,8 @@ Cambios aplicados en este orden:
 2. **Dependencias**: Serenity 2.0.43 → 5.4.1 en todos los artefactos. `serenity-cucumber4:1.0.5` desaparece; su sustituto es `serenity-cucumber:5.4.1`. Se elimina el `resolutionStrategy.force` de `cucumber-core`: `serenity-cucumber` aporta Cucumber 8.0.4 (`cucumber-core`, `cucumber-java` y `cucumber-junit`) como transitivas, sin fijar versión.
 3. **Java**: toolchain 17. Serenity 5.4.1 se publica para Java 17 y Gradle 9 necesita JDK 17 o superior para arrancar.
 4. **Código de test**: `cucumber.api.*` dejó de existir en Cucumber 5. Los imports pasan a `io.cucumber.junit.CucumberOptions`, `io.cucumber.junit.CucumberOptions.SnippetType` e `io.cucumber.java.*`. La lógica de los pasos no cambia.
-5. **Resto de versiones**: JUnit 4.13.2, AssertJ 3.27.7, SLF4J Simple 2.0.20 y `serenity-gradle-plugin` 2.4.34, la última publicada.
+5. **Runner**: se abandona JUnit 4. `CucumberWithSerenity` y `@CucumberOptions` desaparecen; la entrada pasa a ser una suite de JUnit Platform (`@Suite`, `@SelectClasspathResource`, `@ConfigurationParameter`) y el motor lo aporta `cucumber-junit-platform-engine`. Se retiran `serenity-junit` y `junit:junit`.
+6. **Resto de versiones**: JUnit Platform Suite 6.1.3, AssertJ 3.27.7, SLF4J Simple 2.0.20 y `serenity-gradle-plugin` 2.4.34, la última publicada.
 
 Configuración actual de `build.gradle`:
 
@@ -238,9 +240,9 @@ dependencies {
 }
 ```
 
-Con Cucumber 8 los imports de las definiciones de pasos son `io.cucumber.java.*` y las opciones del runner viven en `io.cucumber.junit.CucumberOptions`, con `SnippetType` como enum anidado.
+Con Cucumber 8 los imports de las definiciones de pasos son `io.cucumber.java.*` y la configuración ya no vive en `@CucumberOptions`, sino en parámetros de la suite (`cucumber.glue`, `cucumber.plugin`).
 
-El runner sigue siendo `net.serenitybdd.cucumber.CucumberWithSerenity` sobre JUnit 4. El compilador lo marca como deprecado para eliminación, igual que `io.cucumber.junit.CucumberOptions`: Serenity empuja hacia JUnit Platform, pero cambiar el runner queda fuera de este cambio.
+El runner de JUnit 4 se sustituyó por una suite de JUnit Platform. El informe lo sigue generando Serenity, ahora como plugin de Cucumber (`net.serenitybdd.cucumber.core.plugin.SerenityReporter`) en lugar de como runner.
 
 ## Estado y limitaciones
 
@@ -251,7 +253,6 @@ Puntos detectados en el código y en la ejecución actual:
 | Sin aserciones | El escenario no puede fallar por un resultado incorrecto. Es una demo de integración, no una prueba de negocio. |
 | Sin uso de WebDriver | `serenity.properties` y los drivers están configurados, pero ningún paso abre un navegador. |
 | Drivers solo para Windows | `chromedriver.exe` y `geckodriver.exe` no sirven en macOS ni Linux. [por confirmar: versión de los drivers] |
-| Runner JUnit 4 deprecado | `CucumberWithSerenity` y `io.cucumber.junit.CucumberOptions` están marcados para eliminación en Serenity 5.4.1 / Cucumber 8. Se mantienen a propósito: `serenity-cucumber:5.4.1` no publica integración con JUnit Platform — solo el runner de JUnit 4 y el backend de Cucumber (`SerenityBackend`, `SerenityObjectFactory`) por SPI, sin ningún `TestEngine` registrado. Mover el runner a `cucumber-junit-platform-engine` obligaría a conectar `SerenityReporter` a mano, sin soporte documentado, y pondría en riesgo el informe. Se revisa cuando Serenity publique esa integración. |
 | Nombres con sufijo `Cucumber4` | Las clases y el feature conservan el nombre de la migración anterior; la versión real es Cucumber 8. |
 | Escenario mal nombrado | El título `Crear Repositorio Exitosamente` no tiene relación con la feature `Sumar`: parece un resto de copia. |
 | Actor fijado en el `When` | El paso `Andres suma {int} mas {double}` fija el nombre del actor, mientras el `Given` lo recibe por parámetro. |
