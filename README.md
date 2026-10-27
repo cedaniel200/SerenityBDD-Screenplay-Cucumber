@@ -6,198 +6,98 @@
 ![Gradle](https://img.shields.io/badge/Gradle-9.8.2-darkgreen)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-Plantilla para empezar un proyecto de automatización de pruebas con Serenity BDD, el patrón Screenplay y Cucumber sobre Gradle. Trae la estructura, el runner y el informe ya conectados: se clona, se renombra el paquete base y se empiezan a escribir escenarios.
+Plantilla para empezar un proyecto de automatización de pruebas con Serenity BDD, el patrón
+Screenplay y Cucumber sobre Gradle. Estructura, runner e informe ya conectados.
 
-## Tabla de contenido
-
-- [Qué incluye](#qué-incluye)
-- [Requisitos](#requisitos)
-- [Cómo empezar](#cómo-empezar)
-- [Estructura](#estructura)
-- [Cómo se ejecuta](#cómo-se-ejecuta)
-- [Escribir tus pruebas](#escribir-tus-pruebas)
-- [Configuración](#configuración)
-- [Informe de resultados](#informe-de-resultados)
-- [Docker](#docker)
-- [Ten en cuenta](#ten-en-cuenta)
-- [Licencia](#licencia)
+Usa **Use this template** en GitHub para crear tu repositorio a partir de esta plantilla.
 
 ## Qué incluye
 
-- **Serenity BDD 5.4.1** con el patrón **Screenplay**: paquetes `task`, `interactions`, `questions` y `userinterfaces` listos para llenar.
-- **Cucumber 8** ejecutado sobre **JUnit Platform**: una suite (`CucumberTestSuite`) que descubre los `.feature` de `src/test/resources/features`.
-- **Informe HTML de Serenity** generado desde el plugin de Cucumber, sin runner propio.
-- **Gradle 9.8.2** con wrapper incluido y toolchain de Java 17.
+- **Screenplay** listo para llenar: `task`, `interactions`, `questions` y `userinterfaces`.
+- **Cucumber 8 sobre JUnit Platform**: una suite descubre los `.feature` por directorio.
+- **Informe HTML de Serenity** generado desde el plugin de Cucumber.
+- **Gradle 9.8.2** con wrapper y toolchain de Java 17.
 - **Docker** para ejecutar la suite sin instalar nada.
 
 ## Requisitos
 
-- **JDK 17**. El build fija un toolchain de Java 17, así que compila y ejecuta con ese JDK aunque Gradle arranque con otra versión. Gradle 9 necesita JDK 17 o superior; no funciona sobre JDK 11.
-- **Gradle**: no hace falta instalarlo. El repositorio incluye el wrapper (`gradlew`, `gradlew.bat`).
-- **Chrome** instalado, solo si vas a automatizar un navegador. `serenity.properties` apunta a Chrome por defecto.
-- **Driver del navegador**: no hay que descargarlo ni versionarlo. Selenium Manager, incluido en Selenium 4, detecta el navegador y resuelve el driver en la primera ejecución (necesita conexión esa vez).
+- **JDK 17**. Gradle 9 necesita JDK 17 o superior; no funciona sobre JDK 11.
+- **Gradle**: no hace falta instalarlo, el wrapper va incluido.
+- **Chrome**, solo si vas a automatizar un navegador. El driver lo resuelve Selenium Manager.
 
-## Cómo empezar
+## Empezar
 
-1. Clona el repositorio y renómbralo.
-2. Cambia el paquete base `com.cedaniel200` por el tuyo (el `package-info.java` de la raíz lo recuerda). Ajusta también el `group` en `build.gradle`.
-3. Escribe tu primer `.feature` en `src/test/resources/features`.
-4. Implementa los pasos en `src/test/java/com/cedaniel200/stepdefinitions`.
-5. Añade tareas, interacciones y preguntas de Screenplay en `src/main/java/com/cedaniel200`.
-6. Ejecuta `./gradlew test` y abre el informe.
+1. Crea tu repositorio con **Use this template**.
+2. Cambia el paquete base `com.cedaniel200` por el tuyo y el `group` de `build.gradle`.
+3. Escribe tus `.feature` en `src/test/resources/features`.
+4. Implementa los pasos en `stepdefinitions` y el código Screenplay en `src/main`.
+5. Ejecuta `./gradlew test` y abre el informe.
 
-El escenario que viene incluido es una demostración mínima del andamiaje: comprueba que la suite, los pasos y el informe funcionan de punta a punta. No es un ejemplo de negocio; bórralo cuando escribas el tuyo.
+El escenario incluido es una demo del andamiaje: borra cuando escribas el tuyo.
 
 ## Estructura
 
 ```text
-.
-├── build.gradle              # dependencias, toolchain 17, plugin de Serenity
-├── settings.gradle           # nombre del proyecto Gradle
-├── serenity.properties       # navegador y opciones de arranque
-├── Dockerfile                # imagen para ejecutar la suite
-├── docker-compose.yml        # ejecución con el informe montado en el host
-├── gradlew / gradlew.bat     # wrapper de Gradle 9.8.2
-└── src
-    ├── main/java/com/cedaniel200
-    │   ├── task/             # tareas: el "qué hace" el actor
-    │   ├── interactions/     # interacciones con la interfaz
-    │   ├── userinterfaces/   # localizadores de elementos
-    │   ├── questions/        # preguntas: el "qué valida" el actor
-    │   ├── models/           # datos de prueba
-    │   ├── exceptions/       # excepciones propias
-    │   └── utils/            # utilidades
-    └── test
-        ├── java/com/cedaniel200
-        │   ├── runners/CucumberTestSuite.java        # entrada de la suite
-        │   └── stepdefinitions/                      # definiciones de pasos
-        └── resources/features/                       # escenarios .feature
+src/main/java/com/cedaniel200
+├── task/            # qué hace el actor
+├── interactions/    # interacción con la interfaz
+├── userinterfaces/  # localizadores
+├── questions/       # qué valida el actor
+├── models/          # datos de prueba
+├── exceptions/
+└── utils/
+
+src/test
+├── java/com/cedaniel200/runners/CucumberTestSuite.java
+├── java/com/cedaniel200/stepdefinitions/
+└── resources/features/
 ```
 
-Los paquetes de `src/main` vienen vacíos, solo con su `package-info.java`: son los sitios donde va tu código Screenplay, no clases a medio hacer.
+Los paquetes de `src/main` vienen vacíos a propósito: son donde va tu código.
 
-## Cómo se ejecuta
-
-Desde la raíz del proyecto:
+## Ejecutar
 
 ```sh
-# Compila y ejecuta las pruebas con log detallado
-./gradlew clean build -i
-
-# Solo las pruebas
-./gradlew test
-
-# Genera el informe HTML a partir de los resultados
-./gradlew aggregate
+./gradlew clean build -i   # compila y ejecuta con log detallado
+./gradlew test             # solo las pruebas
+./gradlew aggregate        # genera el informe HTML
 ```
 
-En Windows, `gradlew.bat` en lugar de `./gradlew`.
+El informe queda en `target/site/serenity/index.html`. `build` ya incluye `test`, pero no
+regenera el HTML: para eso hace falta `aggregate`.
 
-`build` incluye `test`, así que no hace falta invocarlas por separado. La opción `-i` deja ver los `System.out.println` de los pasos.
-
-## Escribir tus pruebas
-
-Un escenario:
-
-```gherkin
-Feature: Iniciar sesión
-
-  Scenario: Credenciales válidas
-    Given "Ana" está en la página de login
-    When Ana inicia sesión con credenciales válidas
-    Then Ana debería ver el panel principal
-```
-
-Y sus pasos:
-
-```java
-package com.cedaniel200.stepdefinitions;
-
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-
-public class LoginStepDefinitions {
-
-    @Given("{word} está en la página de login")
-    public void estaEnLaPaginaDeLogin(String actor) {
-        // abre el navegador y navega
-    }
-
-    @When("{word} inicia sesión con credenciales válidas")
-    public void iniciaSesion(String actor) {
-        // ejecuta la tarea de Screenplay
-    }
-
-    @Then("{word} debería ver el panel principal")
-    public void deberiaVerElPanel(String actor) {
-        // plantea una Question y la valida con aserción
-    }
-}
-```
-
-Dos reglas que ahorran tiempo:
-
-- **Los pasos no contienen lógica de negocio.** Delegan en tareas y preguntas de Screenplay.
-- **Toda validación termina en una aserción.** Un `Then` que imprime un booleano no prueba nada.
-
-La suite descubre los `.feature` por directorio: añadir un archivo nuevo no requiere tocar código. Si tus pasos viven en otro paquete, añade el paquete al parámetro `cucumber.glue` de `CucumberTestSuite`.
+En Windows, `gradlew.bat`.
 
 ## Configuración
 
 `serenity.properties`:
 
-| Propiedad | Valor | Para qué |
-|---|---|---|
-| `webdriver.driver` | `chrome` | Navegador que usa Serenity |
-| `chrome.switches` | `--start-maximized` | Argumentos de arranque de Chrome |
-
-Otras opciones habituales:
-
 ```properties
-webdriver.base.url=<url-de-tu-aplicacion>
-webdriver.timeouts.implicitlywait=<milisegundos>
-
-# Selenium Grid o navegador remoto
-webdriver.driver=remote
-webdriver.remote.url=<url-del-grid>
+webdriver.driver=chrome
+chrome.switches=--start-maximized
 ```
 
-## Informe de resultados
-
-`./gradlew test` deja los resultados en `target/site/serenity/` y `./gradlew aggregate` construye el HTML en `target/site/serenity/index.html`.
-
-El informe incluye requisitos, escenarios, pasos y capturas. No se versiona: `target/` está fuera de git.
+Para un navegador remoto: `webdriver.driver=remote` y `webdriver.remote.url=<url-del-grid>`.
 
 ## Docker
 
 ```sh
-# Construir la imagen
-docker build -t serenitybddscreenplaycucumber4 .
-
-# Ejecutar las pruebas dentro del contenedor
-docker run --rm serenitybddscreenplaycucumber4
-
-# Con Compose: el informe queda en ./target/site/serenity
-docker compose up --abort-on-container-exit
+docker build -t <nombre> .
+docker run --rm <nombre>
+docker compose up --abort-on-container-exit   # informe en ./target/site/serenity
 ```
 
-| Aspecto | Valor |
-|---|---|
-| Imagen base | `amazoncorretto:17` (JDK 17, arm64 y amd64) |
-| Comando | `./gradlew clean test aggregate --no-daemon` |
-| Paquetes extra | `findutils`: el wrapper de Gradle 9 invoca `xargs` |
-| Navegador | no incluido |
-
-> [!NOTE]
-> La imagen no trae navegador. Cuando tus escenarios lo necesiten, apunta Serenity a un Selenium Grid (`webdriver.driver=remote`, `webdriver.remote.url=<url>`) o añade Chrome a la imagen. El montaje es `./target:/app/target` y no `./target/site/serenity`: la tarea `clearReports` borra ese directorio y no puede eliminar un punto de montaje.
+La imagen no trae navegador; apunta Serenity a un Selenium Grid cuando lo necesites. El
+montaje es `./target`, no `./target/site/serenity`: la tarea `clearReports` borra ese
+directorio y no puede eliminar un punto de montaje.
 
 ## Ten en cuenta
 
-- **El ejemplo no usa navegador.** El escenario incluido suma dos números: sirve para comprobar la suite y el informe, no para ver Screenplay en acción. Los drivers y `serenity.properties` están preparados para cuando escribas escenarios web.
-- **La suite es la entrada.** Si añades otro runner o una clase con `@Suite`, tendrás dos ejecuciones. Mantén una sola.
-- **`serenity-gradle-plugin` es 2.4.34**, la última publicada. Funciona con Gradle 9.8.2 y no hay sustituto; si Gradle cambia de major, revísalo.
-- **El informe necesita `aggregate`.** `build` ejecuta las pruebas pero no regenera el HTML.
+- **El ejemplo no abre navegador.** Comprueba que la suite y el informe funcionan, no es un
+  ejemplo de negocio.
+- **Un solo runner.** Si añades otra clase con `@Suite`, tendrás dos ejecuciones.
+- **`serenity-gradle-plugin` 2.4.34** es la última publicada; funciona con Gradle 9.8.2 y no
+  hay sustituto. Revísalo si Gradle cambia de major.
 
 ## Licencia
 
