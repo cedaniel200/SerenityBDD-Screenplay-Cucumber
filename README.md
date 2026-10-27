@@ -17,6 +17,7 @@ Proyecto base para automatización de pruebas web con Serenity BDD, el patrón S
 - [Stack](#stack)
 - [Requisitos](#requisitos)
 - [Cómo se ejecuta](#cómo-se-ejecuta)
+- [Docker](#docker)
 - [Estructura](#estructura)
 - [Uso](#uso)
 - [Pruebas](#pruebas)
@@ -94,6 +95,37 @@ La ejecución deja los resultados en `target/site/serenity/`. El informe HTML ag
 
 y queda en `target/site/serenity/index.html`. `target/` está en `.gitignore`, así que el informe no se versiona.
 
+## Docker
+
+El repositorio incluye `Dockerfile`, `.dockerignore` y `docker-compose.yml` para ejecutar la suite sin instalar JDK ni Gradle.
+
+```sh
+# Construir la imagen
+docker build -t serenitybddscreenplaycucumber4 .
+
+# Ejecutar las pruebas y generar el informe dentro del contenedor
+docker run --rm serenitybddscreenplaycucumber4
+```
+
+Con Compose, el informe queda en el host:
+
+```sh
+docker compose up --abort-on-container-exit
+# informe: ./target/site/serenity/index.html
+```
+
+Detalles de la imagen:
+
+| Aspecto | Valor |
+|---|---|
+| Imagen base | `amazoncorretto:17` (JDK 17, arm64 y amd64) |
+| Comando | `./gradlew clean test aggregate --no-daemon` |
+| Paquetes extra | `findutils`: el wrapper de Gradle 9 invoca `xargs` |
+| Navegador | **no incluido**: el escenario de ejemplo no lo necesita |
+
+> [!NOTE]
+> Cuando añadas escenarios que usen navegador, la imagen no basta: apunta Serenity a un Selenium Grid (`webdriver.driver=remote`, `webdriver.remote.url=<url>`) o añade Chrome y Selenium Manager a la imagen. Montar `./target:/app/target` es necesario porque la tarea `clearReports` borra el directorio de salida y no puede eliminar un punto de montaje.
+
 ## Estructura
 
 ```text
@@ -103,6 +135,9 @@ y queda en `target/site/serenity/index.html`. `target/` está en `.gitignore`, a
 ├── serenity.properties           # navegador y opciones de arranque de Chrome
 ├── gradlew / gradlew.bat         # wrapper de Gradle 9.8.2
 ├── gradle/wrapper/               # jar y properties del wrapper
+├── Dockerfile                    # imagen para ejecutar la suite
+├── docker-compose.yml            # ejecución con informe montado en el host
+├── .dockerignore                 # excluye build/, target/ y .git/
 ├── LICENSE                       # MIT
 └── src
     ├── main/java/com/cedaniel200
