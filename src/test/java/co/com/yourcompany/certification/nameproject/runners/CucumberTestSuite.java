@@ -1,4 +1,4 @@
-package com.cedaniel200.runners;
+package co.com.yourcompany.certification.nameproject.runners;
 
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
@@ -11,7 +11,7 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.cedaniel200.stepdefinitions")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "co.com.yourcompany.certification.nameproject.stepdefinitions")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "net.serenitybdd.cucumber.core.plugin.SerenityReporter,pretty")
 public class CucumberTestSuite {
 }

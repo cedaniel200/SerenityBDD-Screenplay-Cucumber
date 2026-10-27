@@ -1,4 +1,4 @@
-package com.cedaniel200.interactions;
+package co.com.yourcompany.certification.nameproject.interactions;
 
 /*
 *

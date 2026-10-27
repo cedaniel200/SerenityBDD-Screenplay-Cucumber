@@ -1,4 +1,4 @@
-package com.cedaniel200.questions;
+package co.com.yourcompany.certification.nameproject.questions;
 
 /*
 * + questions
