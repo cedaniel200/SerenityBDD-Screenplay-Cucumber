@@ -1,4 +1,4 @@
-package com.cedaniel200.models;
+package co.com.yourcompany.certification.nameproject.models;
 
 /*
 *

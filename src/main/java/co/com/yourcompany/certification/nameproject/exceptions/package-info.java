@@ -1,4 +1,4 @@
-package com.cedaniel200.exceptions;
+package co.com.yourcompany.certification.nameproject.exceptions;
 
 /*
 *

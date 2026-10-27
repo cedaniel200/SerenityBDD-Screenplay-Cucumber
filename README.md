@@ -28,7 +28,7 @@ Usa **Use this template** en GitHub para crear tu repositorio a partir de esta p
 ## Empezar
 
 1. Crea tu repositorio con **Use this template**.
-2. Cambia el paquete base `com.cedaniel200` por el tuyo y el `group` de `build.gradle`.
+2. Reemplaza los dos marcadores del paquete base `co.com.yourcompany.certification.nameproject`: `yourcompany` por tu organización y `nameproject` por tu proyecto. Ajusta también el `group` de `build.gradle`.
 3. Escribe tus `.feature` en `src/test/resources/features`.
 4. Implementa los pasos en `stepdefinitions` y el código Screenplay en `src/main`.
 5. Ejecuta `./gradlew test` y abre el informe.
@@ -38,22 +38,30 @@ El escenario incluido es una demo del andamiaje: borra cuando escribas el tuyo.
 ## Estructura
 
 ```text
-src/main/java/com/cedaniel200
-├── task/            # qué hace el actor
-├── interactions/    # interacción con la interfaz
-├── userinterfaces/  # localizadores
-├── questions/       # qué valida el actor
-├── models/          # datos de prueba
+src/main/java/co/com/yourcompany/certification/nameproject
+├── tasks/            # qué hace el actor
+├── interactions/     # interacción con la interfaz
+├── userinterfaces/   # localizadores
+├── questions/        # qué valida el actor
+├── models/           # datos de prueba
 ├── exceptions/
 └── utils/
 
 src/test
-├── java/com/cedaniel200/runners/CucumberTestSuite.java
-├── java/com/cedaniel200/stepdefinitions/
+├── java/co/com/yourcompany/certification/nameproject/runners/CucumberTestSuite.java
+├── java/co/com/yourcompany/certification/nameproject/stepdefinitions/
 └── resources/features/
 ```
 
+Esta es la **estructura base**, no una lista cerrada. Añade los paquetes que tu proyecto
+necesite: `builders`, `enumerables`, `validations` u otros, dentro del mismo paquete base.
+
 Los paquetes de `src/main` vienen vacíos a propósito: son donde va tu código.
+
+> [!TIP]
+> ¿Quieres ver esta estructura llena y funcionando? En
+> [serenity-screenplay-demo](https://github.com/cedaniel200/serenity-screenplay-demo) hay un caso
+> completo de punta a punta construido sobre la misma base.
 
 ## Ejecutar
 

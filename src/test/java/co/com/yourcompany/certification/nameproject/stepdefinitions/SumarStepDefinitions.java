@@ -1,4 +1,4 @@
-package com.cedaniel200.stepdefinitions;
+package co.com.yourcompany.certification.nameproject.stepdefinitions;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
