@@ -1,75 +1,117 @@
-# SerenityBDD + Screenplay + Cucumber4 
+# SerenityBDD + Screenplay + Cucumber
 
-Proyecto base para proyectos de automatización web con serenityBDD, screenplay y cucumber4.
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Serenity BDD](https://img.shields.io/badge/Serenity%20BDD-5.4.1-green)
+![Cucumber](https://img.shields.io/badge/Cucumber-8.0.4-brightgreen)
+![Gradle](https://img.shields.io/badge/Gradle-9.8.2-darkgreen)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-# Migración Cucumber2 a Cucumber4 (Gradle)
+Plantilla para empezar un proyecto de automatización de pruebas con Serenity BDD, el patrón
+Screenplay y Cucumber sobre Gradle. Estructura, runner e informe ya conectados.
 
-Se debe:
-* Asegurarse de que la versión **4.x** de **cucumber-core** se utiliza con el elemento **resolutionStrategy**
-* Agregar la dependencias de **cucumber-java** y **cucumber-junit** usando la versión **4.x**
-* Usar la dependencia **net.serenity-bdd:serenity-cucumber4** en vez de **net.serenity-bdd:serenity-cucumber**
+Usa **Use this template** en GitHub para crear tu repositorio a partir de esta plantilla.
 
-        configurations.all {
-            resolutionStrategy {
-                force "io.cucumber:cucumber-core:4.2.0"
-            }
-        }
-        
-        dependencies {
-            testImplementation "net.serenity-bdd:serenity-core:2.0.43"
-            testImplementation "net.serenity-bdd:serenity-cucumber4:1.0.5"
-            testImplementation "io.cucumber:cucumber-core:4.2.0"
-            testImplementation "io.cucumber:cucumber-junit:4.2.0"
-        }
+## Qué incluye
 
+- **Screenplay** listo para llenar: `task`, `interactions`, `questions` y `userinterfaces`.
+- **Cucumber 8 sobre JUnit Platform**: una suite descubre los `.feature` por directorio.
+- **Informe HTML de Serenity** generado desde el plugin de Cucumber.
+- **Gradle 9.8.2** con wrapper y toolchain de Java 17.
+- **Docker** para ejecutar la suite sin instalar nada.
 
-más información
+## Requisitos
 
-https://cucumber.io/blog/open-source/announcing-cucumber-jvm-4-2-0/
+- **JDK 17**. Gradle 9 necesita JDK 17 o superior; no funciona sobre JDK 11.
+- **Gradle**: no hace falta instalarlo, el wrapper va incluido.
+- **Un navegador instalado**, solo si vas a automatizar web: Chrome, Firefox, Edge o Safari. El driver lo resuelve Selenium Manager.
 
+## Empezar
 
-## Detalles Arquitectura Propuesta
+1. Crea tu repositorio con **Use this template**.
+2. Cambia el paquete base `com.cedaniel200` por el tuyo y el `group` de `build.gradle`.
+3. Escribe tus `.feature` en `src/test/resources/features`.
+4. Implementa los pasos en `stepdefinitions` y el código Screenplay en `src/main`.
+5. Ejecuta `./gradlew test` y abre el informe.
 
-Con este proyecto ya puedes empezar a construir tus test usando el patrón screenplay, solo debes:
- * Cambiar el nombre del paquete base **com.cedaniel200** por el de tu organización, por ejemplo **co.com.organizacion**
- * Crear los paquetes que hacen falta en el módulo main dentro del paquete base, según la arquitectura propuesta a continuación:
+El escenario incluido es una demo del andamiaje: borra cuando escribas el tuyo.
 
-````
------ Módulo main
-+ exceptions
-    Clases que controlan las posibles excepciones técnicas y de negocios que se presentan durante la ejecución de pruebas
-+ model
-    Clases relacionadas con el modelo de dominio y sus respectivos builder cuando es necesario
-+ tasks
-    Clases que representan tareas que realiza el actor a nivel de proceso de negocio
-+ interactions
-    Clases que representan las interacciones directas con la interfaz de usuario
-+ userinterface
-    Page Objects y Page Elements. Mapean los objetos de la interfaz de usuario
-+ questions
-    Objetos usados para consultar acerca del estado de la aplicación
-+ util
-    Clases de utilidad
------ Módulo test
-+ runners
-    Clases que permiten correr los tests
-+ step definitions
-    Clases que mapean las líneas Gherkin a código java
-+ features
-    La representación de las historias en archivos cucumber
-````
+## Estructura
 
-## Requerimientos
+```text
+src/main/java/com/cedaniel200
+├── task/            # qué hace el actor
+├── interactions/    # interacción con la interfaz
+├── userinterfaces/  # localizadores
+├── questions/       # qué valida el actor
+├── models/          # datos de prueba
+├── exceptions/
+└── utils/
 
-Para correr el proyecto se necesita Java JDK 1.8 y Gradle preferiblemente con la versión 5.2.1.
+src/test
+├── java/com/cedaniel200/runners/CucumberTestSuite.java
+├── java/com/cedaniel200/stepdefinitions/
+└── resources/features/
+```
 
-## Para correr el proyecto
+Los paquetes de `src/main` vienen vacíos a propósito: son donde va tu código.
 
-Ejecutar el comando:
+## Ejecutar
 
-    gradle clean build test -i
+```sh
+./gradlew clean build -i   # compila y ejecuta con log detallado
+./gradlew test             # solo las pruebas
+./gradlew aggregate        # genera el informe HTML
+```
 
-Donde se podra ver en consola los diferentes mensajes que demuestran que se esta haciendo uso de algunas de las nuevas 
-caracteristicas de Cucumber4
+El informe queda en `target/site/serenity/index.html`. `build` ya incluye `test`, pero no
+regenera el HTML: para eso hace falta `aggregate`.
 
- ### Si tiene alguna pregunta, puede escribirme a cdanielmg200@gmail.com
+En Windows, `gradlew.bat`.
+
+## Configuración
+
+`serenity.properties` viene apuntado a Chrome, pero `webdriver.driver` acepta cualquiera de
+los navegadores que soporta Serenity. El navegador es una línea de configuración, no una
+dependencia de la plantilla:
+
+| Valor | Navegador |
+|---|---|
+| `chrome` | Chrome o Chromium |
+| `firefox` | Firefox |
+| `edge` | Microsoft Edge |
+| `safari` | Safari (macOS) |
+| `remote` | Selenium Grid o navegador remoto |
+| `appium` | Aplicaciones móviles |
+
+```properties
+webdriver.driver=chrome
+chrome.switches=--start-maximized
+```
+
+`chrome.switches` solo aplica a Chrome. Para Firefox, las preferencias van en
+`firefox.preferences.<clave>=<valor>`. Para un navegador remoto: `webdriver.driver=remote` y
+`webdriver.remote.url=<url-del-grid>`.
+
+## Docker
+
+```sh
+docker build -t <nombre> .
+docker run --rm <nombre>
+docker compose up --abort-on-container-exit   # informe en ./target/site/serenity
+```
+
+La imagen no trae navegador; apunta Serenity a un Selenium Grid cuando lo necesites. El
+montaje es `./target`, no `./target/site/serenity`: la tarea `clearReports` borra ese
+directorio y no puede eliminar un punto de montaje.
+
+## Ten en cuenta
+
+- **El ejemplo no abre navegador.** Comprueba que la suite y el informe funcionan, no es un
+  ejemplo de negocio.
+- **Un solo runner.** Si añades otra clase con `@Suite`, tendrás dos ejecuciones.
+- **`serenity-gradle-plugin` 2.4.34** es la última publicada; funciona con Gradle 9.8.2 y no
+  hay sustituto. Revísalo si Gradle cambia de major.
+
+## Licencia
+
+[MIT](LICENSE) © Cesar Daniel
