@@ -10,7 +10,7 @@ import net.serenitybdd.screenplay.actors.OnlineCast;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
 
-public class PruebaCucumber4StepDefinitions {
+public class SumarStepDefinitions {
 
     public static final String OPERACION = "OPERACION";
 
