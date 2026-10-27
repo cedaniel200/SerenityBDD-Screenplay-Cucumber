@@ -23,7 +23,7 @@ Usa **Use this template** en GitHub para crear tu repositorio a partir de esta p
 
 - **JDK 17**. Gradle 9 necesita JDK 17 o superior; no funciona sobre JDK 11.
 - **Gradle**: no hace falta instalarlo, el wrapper va incluido.
-- **Chrome**, solo si vas a automatizar un navegador. El driver lo resuelve Selenium Manager.
+- **Un navegador instalado**, solo si vas a automatizar web: Chrome, Firefox, Edge o Safari. El driver lo resuelve Selenium Manager.
 
 ## Empezar
 
@@ -70,14 +70,27 @@ En Windows, `gradlew.bat`.
 
 ## Configuración
 
-`serenity.properties`:
+`serenity.properties` viene apuntado a Chrome, pero `webdriver.driver` acepta cualquiera de
+los navegadores que soporta Serenity. El navegador es una línea de configuración, no una
+dependencia de la plantilla:
+
+| Valor | Navegador |
+|---|---|
+| `chrome` | Chrome o Chromium |
+| `firefox` | Firefox |
+| `edge` | Microsoft Edge |
+| `safari` | Safari (macOS) |
+| `remote` | Selenium Grid o navegador remoto |
+| `appium` | Aplicaciones móviles |
 
 ```properties
 webdriver.driver=chrome
 chrome.switches=--start-maximized
 ```
 
-Para un navegador remoto: `webdriver.driver=remote` y `webdriver.remote.url=<url-del-grid>`.
+`chrome.switches` solo aplica a Chrome. Para Firefox, las preferencias van en
+`firefox.preferences.<clave>=<valor>`. Para un navegador remoto: `webdriver.driver=remote` y
+`webdriver.remote.url=<url-del-grid>`.
 
 ## Docker
 
