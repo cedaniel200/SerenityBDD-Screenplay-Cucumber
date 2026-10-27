@@ -1,4 +1,4 @@
-# SerenityBDD + Screenplay + Cucumber 8
+# SerenityBDD + Screenplay + Cucumber
 
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Serenity BDD](https://img.shields.io/badge/Serenity%20BDD-5.4.1-green)
@@ -6,290 +6,199 @@
 ![Gradle](https://img.shields.io/badge/Gradle-9.8.2-darkgreen)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-Proyecto base para automatización de pruebas web con Serenity BDD, el patrón Screenplay y Cucumber 8 sobre Gradle.
-
-> [!NOTE]
-> El feature y las definiciones de pasos conservan el sufijo `Cucumber4` (`prueba_cucumber4.feature`, `PruebaCucumber4StepDefinitions`) porque se mantuvieron al migrar de Cucumber 2 a 4 y de 4 a 8. Son nombres históricos, no la versión en uso.
+Plantilla para empezar un proyecto de automatización de pruebas con Serenity BDD, el patrón Screenplay y Cucumber sobre Gradle. Trae la estructura, el runner y el informe ya conectados: se clona, se renombra el paquete base y se empiezan a escribir escenarios.
 
 ## Tabla de contenido
 
-- [Qué demuestra](#qué-demuestra)
-- [Stack](#stack)
+- [Qué incluye](#qué-incluye)
 - [Requisitos](#requisitos)
-- [Cómo se ejecuta](#cómo-se-ejecuta)
-- [Docker](#docker)
+- [Cómo empezar](#cómo-empezar)
 - [Estructura](#estructura)
-- [Uso](#uso)
-- [Pruebas](#pruebas)
+- [Cómo se ejecuta](#cómo-se-ejecuta)
+- [Escribir tus pruebas](#escribir-tus-pruebas)
 - [Configuración](#configuración)
-- [Patrón y arquitectura](#patrón-y-arquitectura)
-- [Migración de Cucumber 4 a Cucumber 8](#migración-de-cucumber-4-a-cucumber-8)
-- [Estado y limitaciones](#estado-y-limitaciones)
+- [Informe de resultados](#informe-de-resultados)
+- [Docker](#docker)
+- [Ten en cuenta](#ten-en-cuenta)
 - [Licencia](#licencia)
 
-## Qué demuestra
+## Qué incluye
 
-- Integración de Serenity BDD con Cucumber 8 sobre **JUnit Platform**, con `@Suite` + `@SelectClasspathResource` y el informe de Serenity generado desde el plugin `SerenityReporter`.
-- Uso de `OnStage` y `OnlineCast` para preparar el escenario y de `remember` / `recall` para guardar datos entre pasos.
-- Expresiones de parámetros de Cucumber 8 en las definiciones de pasos: `{string}`, `{int}` y `{double}`.
-- Un esqueleto de paquetes Screenplay (`task`, `interactions`, `userinterfaces`, `questions`, `models`, `exceptions`, `utils`) listo para rellenar.
-
-> [!WARNING]
-> El escenario incluido no abre ningún navegador ni comprueba nada: solo imprime mensajes por consola. Una ejecución en verde no valida el comportamiento de la aplicación. Ver [Pruebas](#pruebas) y [Estado y limitaciones](#estado-y-limitaciones).
-
-## Stack
-
-| Tecnología | Versión | Origen |
-|---|---|---|
-| Java (JDK) | 17 | `build.gradle` (`java.toolchain`, `JavaLanguageVersion.of(17)`) |
-| Gradle (wrapper) | 9.8.2 | `gradle/wrapper/gradle-wrapper.properties` |
-| Serenity BDD (`serenity-core`, `serenity-junit`) | 5.4.1 | `build.gradle` (`serenityVersion`) |
-| Serenity Screenplay (`serenity-screenplay`, `serenity-screenplay-webdriver`) | 5.4.1 | `build.gradle` |
-| Serenity Cucumber (`serenity-cucumber`) | 5.4.1 | `build.gradle` |
-| Cucumber JVM (`cucumber-core`, `cucumber-java`, `cucumber-junit`) | 8.0.4 | Transitiva de `serenity-cucumber:5.4.1`; no se declara versión |
-| Plugin de Gradle de Serenity (`serenity-gradle-plugin`) | 2.4.34 | `build.gradle` (`serenityGradlePluginVersion`) |
-| JUnit Platform Suite | 6.1.3 | `build.gradle` |
-| Cucumber JUnit Platform Engine | 8.0.4 | `build.gradle` |
-| AssertJ | 3.27.7 | `build.gradle` (declarada, sin uso en el código actual) |
-| SLF4J Simple | 2.0.20 | `build.gradle` |
+- **Serenity BDD 5.4.1** con el patrón **Screenplay**: paquetes `task`, `interactions`, `questions` y `userinterfaces` listos para llenar.
+- **Cucumber 8** ejecutado sobre **JUnit Platform**: una suite (`CucumberTestSuite`) que descubre los `.feature` de `src/test/resources/features`.
+- **Informe HTML de Serenity** generado desde el plugin de Cucumber, sin runner propio.
+- **Gradle 9.8.2** con wrapper incluido y toolchain de Java 17.
+- **Docker** para ejecutar la suite sin instalar nada.
 
 ## Requisitos
 
-- **JDK 17**. El `build.gradle` fija un toolchain de Java 17: compila y ejecuta los tests con un JDK 17 aunque Gradle arranque con otra versión. Ese JDK 17 debe estar instalado y ser detectable por Gradle. Gradle 9.8.2, a su vez, necesita JDK 17 o superior para arrancar; no funciona sobre JDK 11.
-- **Gradle**: no hace falta instalarlo. El repositorio incluye el wrapper (`gradlew`, `gradlew.bat`, `gradle/wrapper/`).
-- **Driver de navegador**: no hay que descargarlo ni versionarlo. Selenium 4 incluye Selenium Manager, que detecta el navegador instalado y resuelve el driver adecuado en la primera ejecución (requiere conexión a internet esa vez).
-- **Chrome** instalado, porque `serenity.properties` fija `webdriver.driver=chrome` (ver [Configuración](#configuración)).
+- **JDK 17**. El build fija un toolchain de Java 17, así que compila y ejecuta con ese JDK aunque Gradle arranque con otra versión. Gradle 9 necesita JDK 17 o superior; no funciona sobre JDK 11.
+- **Gradle**: no hace falta instalarlo. El repositorio incluye el wrapper (`gradlew`, `gradlew.bat`).
+- **Chrome** instalado, solo si vas a automatizar un navegador. `serenity.properties` apunta a Chrome por defecto.
+- **Driver del navegador**: no hay que descargarlo ni versionarlo. Selenium Manager, incluido en Selenium 4, detecta el navegador y resuelve el driver en la primera ejecución (necesita conexión esa vez).
 
-> [!NOTE]
-> El repo no incluye drivers: se resuelven con Selenium Manager. Si la máquina no tiene Chrome instalado, `webdriver.driver=chrome` fallará; cambia el valor en `serenity.properties` o aporta un driver propio con `webdriver.chrome.driver`.
+## Cómo empezar
+
+1. Clona el repositorio y renómbralo.
+2. Cambia el paquete base `com.cedaniel200` por el tuyo (el `package-info.java` de la raíz lo recuerda). Ajusta también el `group` en `build.gradle`.
+3. Escribe tu primer `.feature` en `src/test/resources/features`.
+4. Implementa los pasos en `src/test/java/com/cedaniel200/stepdefinitions`.
+5. Añade tareas, interacciones y preguntas de Screenplay en `src/main/java/com/cedaniel200`.
+6. Ejecuta `./gradlew test` y abre el informe.
+
+El escenario que viene incluido es una demostración mínima del andamiaje: comprueba que la suite, los pasos y el informe funcionan de punta a punta. No es un ejemplo de negocio; bórralo cuando escribas el tuyo.
+
+## Estructura
+
+```text
+.
+├── build.gradle              # dependencias, toolchain 17, plugin de Serenity
+├── settings.gradle           # nombre del proyecto Gradle
+├── serenity.properties       # navegador y opciones de arranque
+├── Dockerfile                # imagen para ejecutar la suite
+├── docker-compose.yml        # ejecución con el informe montado en el host
+├── gradlew / gradlew.bat     # wrapper de Gradle 9.8.2
+└── src
+    ├── main/java/com/cedaniel200
+    │   ├── task/             # tareas: el "qué hace" el actor
+    │   ├── interactions/     # interacciones con la interfaz
+    │   ├── userinterfaces/   # localizadores de elementos
+    │   ├── questions/        # preguntas: el "qué valida" el actor
+    │   ├── models/           # datos de prueba
+    │   ├── exceptions/       # excepciones propias
+    │   └── utils/            # utilidades
+    └── test
+        ├── java/com/cedaniel200
+        │   ├── runners/CucumberTestSuite.java        # entrada de la suite
+        │   └── stepdefinitions/                      # definiciones de pasos
+        └── resources/features/                       # escenarios .feature
+```
+
+Los paquetes de `src/main` vienen vacíos, solo con su `package-info.java`: son los sitios donde va tu código Screenplay, no clases a medio hacer.
 
 ## Cómo se ejecuta
 
-Situado en la raíz del repositorio:
+Desde la raíz del proyecto:
 
 ```sh
-# Compila y ejecuta la suite Cucumber (macOS / Linux)
+# Compila y ejecuta las pruebas con log detallado
 ./gradlew clean build -i
-```
 
-```bat
-:: Equivalente en Windows
-gradlew.bat clean build -i
-```
-
-`build` incluye la tarea `test`, así que no hace falta invocarlas por separado. La opción `-i` sube el nivel de log a `info` y deja ver los `System.out.println` que imprimen los pasos.
-
-`build.gradle` activa `gradle.startParameter.continueOnFailure = true`, de modo que Gradle no se detiene en el primer fallo de tarea.
-
-Para ejecutar solo las pruebas:
-
-```sh
+# Solo las pruebas
 ./gradlew test
-```
 
-La ejecución deja los resultados en `target/site/serenity/`. El informe HTML agregado se construye con:
-
-```sh
+# Genera el informe HTML a partir de los resultados
 ./gradlew aggregate
 ```
 
-y queda en `target/site/serenity/index.html`. `target/` está en `.gitignore`, así que el informe no se versiona.
+En Windows, `gradlew.bat` en lugar de `./gradlew`.
+
+`build` incluye `test`, así que no hace falta invocarlas por separado. La opción `-i` deja ver los `System.out.println` de los pasos.
+
+## Escribir tus pruebas
+
+Un escenario:
+
+```gherkin
+Feature: Iniciar sesión
+
+  Scenario: Credenciales válidas
+    Given "Ana" está en la página de login
+    When Ana inicia sesión con credenciales válidas
+    Then Ana debería ver el panel principal
+```
+
+Y sus pasos:
+
+```java
+package com.cedaniel200.stepdefinitions;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+
+public class LoginStepDefinitions {
+
+    @Given("{word} está en la página de login")
+    public void estaEnLaPaginaDeLogin(String actor) {
+        // abre el navegador y navega
+    }
+
+    @When("{word} inicia sesión con credenciales válidas")
+    public void iniciaSesion(String actor) {
+        // ejecuta la tarea de Screenplay
+    }
+
+    @Then("{word} debería ver el panel principal")
+    public void deberiaVerElPanel(String actor) {
+        // plantea una Question y la valida con aserción
+    }
+}
+```
+
+Dos reglas que ahorran tiempo:
+
+- **Los pasos no contienen lógica de negocio.** Delegan en tareas y preguntas de Screenplay.
+- **Toda validación termina en una aserción.** Un `Then` que imprime un booleano no prueba nada.
+
+La suite descubre los `.feature` por directorio: añadir un archivo nuevo no requiere tocar código. Si tus pasos viven en otro paquete, añade el paquete al parámetro `cucumber.glue` de `CucumberTestSuite`.
+
+## Configuración
+
+`serenity.properties`:
+
+| Propiedad | Valor | Para qué |
+|---|---|---|
+| `webdriver.driver` | `chrome` | Navegador que usa Serenity |
+| `chrome.switches` | `--start-maximized` | Argumentos de arranque de Chrome |
+
+Otras opciones habituales:
+
+```properties
+webdriver.base.url=<url-de-tu-aplicacion>
+webdriver.timeouts.implicitlywait=<milisegundos>
+
+# Selenium Grid o navegador remoto
+webdriver.driver=remote
+webdriver.remote.url=<url-del-grid>
+```
+
+## Informe de resultados
+
+`./gradlew test` deja los resultados en `target/site/serenity/` y `./gradlew aggregate` construye el HTML en `target/site/serenity/index.html`.
+
+El informe incluye requisitos, escenarios, pasos y capturas. No se versiona: `target/` está fuera de git.
 
 ## Docker
-
-El repositorio incluye `Dockerfile`, `.dockerignore` y `docker-compose.yml` para ejecutar la suite sin instalar JDK ni Gradle.
 
 ```sh
 # Construir la imagen
 docker build -t serenitybddscreenplaycucumber4 .
 
-# Ejecutar las pruebas y generar el informe dentro del contenedor
+# Ejecutar las pruebas dentro del contenedor
 docker run --rm serenitybddscreenplaycucumber4
-```
 
-Con Compose, el informe queda en el host:
-
-```sh
+# Con Compose: el informe queda en ./target/site/serenity
 docker compose up --abort-on-container-exit
-# informe: ./target/site/serenity/index.html
 ```
-
-Detalles de la imagen:
 
 | Aspecto | Valor |
 |---|---|
 | Imagen base | `amazoncorretto:17` (JDK 17, arm64 y amd64) |
 | Comando | `./gradlew clean test aggregate --no-daemon` |
 | Paquetes extra | `findutils`: el wrapper de Gradle 9 invoca `xargs` |
-| Navegador | **no incluido**: el escenario de ejemplo no lo necesita |
+| Navegador | no incluido |
 
 > [!NOTE]
-> Cuando añadas escenarios que usen navegador, la imagen no basta: apunta Serenity a un Selenium Grid (`webdriver.driver=remote`, `webdriver.remote.url=<url>`) o añade Chrome y Selenium Manager a la imagen. Montar `./target:/app/target` es necesario porque la tarea `clearReports` borra el directorio de salida y no puede eliminar un punto de montaje.
+> La imagen no trae navegador. Cuando tus escenarios lo necesiten, apunta Serenity a un Selenium Grid (`webdriver.driver=remote`, `webdriver.remote.url=<url>`) o añade Chrome a la imagen. El montaje es `./target:/app/target` y no `./target/site/serenity`: la tarea `clearReports` borra ese directorio y no puede eliminar un punto de montaje.
 
-## Estructura
+## Ten en cuenta
 
-```text
-.
-├── build.gradle                  # dependencias, toolchain 17, plugin de Serenity
-├── settings.gradle               # rootProject.name = 'automatizacion'
-├── serenity.properties           # navegador y opciones de arranque de Chrome
-├── gradlew / gradlew.bat         # wrapper de Gradle 9.8.2
-├── gradle/wrapper/               # jar y properties del wrapper
-├── Dockerfile                    # imagen para ejecutar la suite
-├── docker-compose.yml            # ejecución con informe montado en el host
-├── .dockerignore                 # excluye build/, target/ y .git/
-├── LICENSE                       # MIT
-└── src
-    ├── main/java/com/cedaniel200
-    │   ├── package-info.java      # nota para renombrar el paquete base
-    │   ├── exceptions/            # excepciones técnicas y de negocio
-    │   ├── interactions/          # interacciones directas con la UI
-    │   ├── models/                # modelo de dominio y builders
-    │   ├── questions/             # consultas sobre el estado de la aplicación
-    │   ├── task/                  # tareas de negocio del actor
-    │   ├── userinterfaces/        # page objects y page elements
-    │   └── utils/                 # utilidades
-    └── test
-        ├── java/com/cedaniel200
-        │   ├── runners/CucumberTestSuite.java            # suite JUnit Platform (entrada)
-        │   └── stepdefinitions/PruebaCucumber4StepDefinitions.java
-        └── resources/features/prueba_cucumber4.feature   # único feature del proyecto
-```
-
-Los paquetes de `src/main/java` contienen únicamente un `package-info.java` con la descripción del paquete: son andamiaje, no hay clases de Screenplay implementadas. El código ejecutable está todo en `src/test`.
-
-## Uso
-
-| Tarea | Comando | Qué hace |
-|---|---|---|
-| Compilar y probar | `./gradlew clean build` | Compila y ejecuta los tests de Cucumber |
-| Solo pruebas | `./gradlew test` | Ejecuta la suite sin empaquetar |
-| Con detalle en consola | `./gradlew clean build -i` | Igual que `build` con log `info` |
-| Cambiar de navegador | `./gradlew test -Dwebdriver.driver=<navegador>` | Sobrescribe `serenity.properties` |
-| Informe agregado | `./gradlew aggregate` | Genera el informe HTML en `target/site/serenity/index.html` |
-
-Las propiedades `-D` de la línea de comandos llegan al JVM de los tests porque `build.gradle` asigna `systemProperties = gradle.startParameter.systemPropertiesArgs` a todas las tareas `Test`. No se copia el resto de propiedades del sistema: hacerlo arrastraba el `java.home` del daemon al JVM del toolchain.
-
-Para convertir el proyecto en la base de un proyecto real:
-
-1. Renombra el paquete base `com.cedaniel200` por el de tu organización (el propio `package-info.java` lo sugiere).
-2. Crea las clases de `task`, `interactions`, `userinterfaces` y `questions` en `src/main/java`.
-3. Añade features en `src/test/resources/features`: la suite las descubre por directorio, no hace falta registrarlas una a una.
-4. Amplía el parámetro `cucumber.glue` de `CucumberTestSuite` si las definiciones de pasos viven en otro paquete.
-
-## Pruebas
-
-Hay **un** feature y **un** escenario:
-
-| Feature | Escenario | Pasos |
-|---|---|---|
-| `prueba_cucumber4.feature` | `Crear Repositorio Exitosamente` | `Given "Andres" quiere sumar`, `When Andres suma 2 mas 3.4`, `Then Andres deberia ver que el resultado es 5.4` |
-
-Lo que la suite ejecuta realmente:
-
-- `prepararEscenario()` monta el escenario con `OnStage.setTheStage(new OnlineCast())` antes de cada escenario.
-- El `Given` registra al actor con `theActorCalled(nombreActor)`.
-- El `When` suma los dos parámetros en Java y guarda el resultado con `remember`.
-- El `Then` recupera el valor con `recall`, calcula un `boolean` y lo imprime.
-
-Lo que **no** hace:
-
-- No hay aserciones: el `boolean` del `Then` solo se imprime, así que el escenario pasa aunque el resultado sea incorrecto.
-- No se abre ninguna URL ni se interactúa con la interfaz: no se usan `Task`, `Interaction`, `Question` ni `PageObject`, pese a tener las dependencias de Screenplay WebDriver.
-- La comparación del resultado se hace con `==` sobre `double`.
-
-> [!NOTE]
-> La suite selecciona el directorio `features` completo, así que cualquier `.feature` nuevo en esa carpeta se ejecuta sin tocar código.
-
-No hay tests unitarios, ni pipeline de CI, ni tareas de análisis estático en el repositorio.
-
-## Configuración
-
-`serenity.properties` en la raíz:
-
-| Propiedad | Valor | Efecto |
-|---|---|---|
-| `webdriver.driver` | `chrome` | Navegador que usa Serenity por defecto |
-| `chrome.switches` | `--start-maximized` | Argumento de arranque de Chrome |
-
-No hay variables de entorno requeridas ni ficheros de credenciales en el repositorio.
-
-Si el proyecto evoluciona hacia pruebas contra un servicio real, las credenciales deberían llegar por variables de entorno o propiedades `-D`, nunca por `serenity.properties` versionado. Marcadores previstos: `<user>`, `<password>`, `<base-url>`, `<api-key>`.
-
-## Patrón y arquitectura
-
-Screenplay con el reparto de responsabilidades habitual:
-
-| Paquete | Responsabilidad |
-|---|---|
-| `task` | Tareas de negocio que ejecuta el actor (`task` en singular es el nombre real del paquete) |
-| `interactions` | Acciones directas sobre la interfaz |
-| `userinterfaces` | Page objects y page elements |
-| `questions` | Consultas sobre el estado de la aplicación |
-| `models` | Modelo de dominio y builders |
-| `exceptions` | Excepciones técnicas y de negocio |
-| `utils` | Utilidades |
-
-El `build.gradle` coloca `serenity-screenplay` y `serenity-screenplay-webdriver` en la configuración `implementation`, porque el código de Screenplay vive en `src/main/java`. Las dependencias de ejecución de pruebas (`serenity-core`, `serenity-cucumber`, el motor de Cucumber para JUnit Platform, la suite de plataforma y AssertJ) están en `testImplementation`.
-
-La ejecución de tests se paraleliza con `maxParallelForks = Runtime.runtime.availableProcessors()`.
-
-## Migración de Cucumber 4 a Cucumber 8
-
-Cambios aplicados en este orden:
-
-1. **Wrapper**: Gradle 5.2.1 → 9.8.2. Gradle 9 ya no expone `jcenter()`, así que se eliminó de los bloques `repositories`, junto con `mavenLocal()`.
-2. **Dependencias**: Serenity 2.0.43 → 5.4.1 en todos los artefactos. `serenity-cucumber4:1.0.5` desaparece; su sustituto es `serenity-cucumber:5.4.1`. Se elimina el `resolutionStrategy.force` de `cucumber-core`: `serenity-cucumber` aporta Cucumber 8.0.4 (`cucumber-core`, `cucumber-java` y `cucumber-junit`) como transitivas, sin fijar versión.
-3. **Java**: toolchain 17. Serenity 5.4.1 se publica para Java 17 y Gradle 9 necesita JDK 17 o superior para arrancar.
-4. **Código de test**: `cucumber.api.*` dejó de existir en Cucumber 5. Los imports pasan a `io.cucumber.junit.CucumberOptions`, `io.cucumber.junit.CucumberOptions.SnippetType` e `io.cucumber.java.*`. La lógica de los pasos no cambia.
-5. **Runner**: se abandona JUnit 4. `CucumberWithSerenity` y `@CucumberOptions` desaparecen; la entrada pasa a ser una suite de JUnit Platform (`@Suite`, `@SelectClasspathResource`, `@ConfigurationParameter`) y el motor lo aporta `cucumber-junit-platform-engine`. Se retiran `serenity-junit` y `junit:junit`.
-6. **Resto de versiones**: JUnit Platform Suite 6.1.3, AssertJ 3.27.7, SLF4J Simple 2.0.20 y `serenity-gradle-plugin` 2.4.34, la última publicada.
-
-Configuración actual de `build.gradle`:
-
-```groovy
-ext {
-    serenityVersion = '5.4.1'
-    serenityGradlePluginVersion = '2.4.34'
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-dependencies {
-    testImplementation "net.serenity-bdd:serenity-core:$rootProject.ext.serenityVersion"
-    testImplementation "net.serenity-bdd:serenity-junit:$rootProject.ext.serenityVersion"
-    implementation "net.serenity-bdd:serenity-screenplay:$rootProject.ext.serenityVersion"
-    implementation "net.serenity-bdd:serenity-screenplay-webdriver:$rootProject.ext.serenityVersion"
-
-    testImplementation "net.serenity-bdd:serenity-cucumber:$rootProject.ext.serenityVersion"
-
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.assertj:assertj-core:3.27.7'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.20'
-}
-```
-
-Con Cucumber 8 los imports de las definiciones de pasos son `io.cucumber.java.*` y la configuración ya no vive en `@CucumberOptions`, sino en parámetros de la suite (`cucumber.glue`, `cucumber.plugin`).
-
-El runner de JUnit 4 se sustituyó por una suite de JUnit Platform. El informe lo sigue generando Serenity, ahora como plugin de Cucumber (`net.serenitybdd.cucumber.core.plugin.SerenityReporter`) en lugar de como runner.
-
-## Estado y limitaciones
-
-Puntos detectados en el código y en la ejecución actual:
-
-| Punto | Detalle |
-|---|---|
-| Sin aserciones | El escenario no puede fallar por un resultado incorrecto. Es una demo de integración, no una prueba de negocio. |
-| Sin uso de WebDriver | `serenity.properties` configura Chrome, pero ningún paso abre un navegador. |
-| Nombres con sufijo `Cucumber4` | Las clases y el feature conservan el nombre de la migración anterior; la versión real es Cucumber 8. |
-| Escenario mal nombrado | El título `Crear Repositorio Exitosamente` no tiene relación con la feature `Sumar`: parece un resto de copia. |
-| Actor fijado en el `When` | El paso `Andres suma {int} mas {double}` fija el nombre del actor, mientras el `Given` lo recibe por parámetro. |
-| Paquetes vacíos | `task`, `interactions`, `questions`, etc. solo contienen `package-info.java`. |
+- **El ejemplo no usa navegador.** El escenario incluido suma dos números: sirve para comprobar la suite y el informe, no para ver Screenplay en acción. Los drivers y `serenity.properties` están preparados para cuando escribas escenarios web.
+- **La suite es la entrada.** Si añades otro runner o una clase con `@Suite`, tendrás dos ejecuciones. Mantén una sola.
+- **`serenity-gradle-plugin` es 2.4.34**, la última publicada. Funciona con Gradle 9.8.2 y no hay sustituto; si Gradle cambia de major, revísalo.
+- **El informe necesita `aggregate`.** `build` ejecuta las pruebas pero no regenera el HTML.
 
 ## Licencia
 
-MIT. Ver [LICENSE](LICENSE).
+[MIT](LICENSE) © Cesar Daniel
