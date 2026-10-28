@@ -58,10 +58,12 @@ necesite: `builders`, `enumerables`, `validations` u otros, dentro del mismo paq
 
 Los paquetes de `src/main` vienen vacíos a propósito: son donde va tu código.
 
-> [!TIP]
-> ¿Quieres ver esta estructura llena y funcionando? En
-> [serenity-screenplay-demo](https://github.com/cedaniel200/serenity-screenplay-demo) hay un caso
-> completo de punta a punta construido sobre la misma base.
+## Ejemplos construidos sobre esta plantilla
+
+- [serenity-screenplay-saucedemo](https://github.com/cedaniel200/serenity-screenplay-saucedemo):
+  flujo de compra web completo, con login, carrito y checkout.
+- [serenity-screenplay-rest-soap](https://github.com/cedaniel200/serenity-screenplay-rest-soap):
+  la misma estructura aplicada a APIs REST y SOAP.
 
 ## Ejecutar
 
